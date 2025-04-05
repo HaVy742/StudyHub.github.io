@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyHub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 10px;
+            margin: 5px;
+            width: 200px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #subjectList {
+            list-style: none;
+            padding: 0;
+        }
+        #subjectList li {
+            background-color: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>StudyHub - Quản lý môn học</h1>
+    <div class="form-container">
+        <input type="text" id="subjectName" placeholder="Tên môn học">
+        <button onclick="addSubject()">Thêm môn học</button>
+    </div>
+    <h2>Danh sách môn học</h2>
+    <ul id="subjectList"></ul>
+
+    <script>
+        // Hàm thêm môn học
+        async function addSubject() {
+            const subjectName = document.getElementById('subjectName').value;
+            if (!subjectName) {
+                alert('Vui lòng nhập tên môn học!');
+                return;
+            }
+
+            // Gửi yêu cầu đến backend để thêm môn học
+            const response = await fetch('/api/subjects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: subjectName })
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                loadSubjects(); // Tải lại danh sách
+                document.getElementById('subjectName').value = ''; // Xóa form
+            } else {
+                alert('Có lỗi xảy ra!');
+            }
+        }
+
+        // Hàm tải danh sách môn học
+        async function loadSubjects() {
+            const response = await fetch('/api/subjects');
+            const subjects = await response.json();
+            const subjectList = document.getElementById('subjectList');
+            subjectList.innerHTML = ''; // Xóa danh sách cũ
+            subjects.forEach(subject => {
+                const li = document.createElement('li');
+                li.textContent = subject.name;
+                subjectList.appendChild(li);
+            });
+        }
+
+        // Tải danh sách khi trang được mở
+        window.onload = loadSubjects;
+    </script>
+</body>
+</html>
